@@ -1,90 +1,83 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 import React, { useReducer } from 'react';
+import PropsTypes from 'prop-types';
 
 import account from './account';
 
-const ContactForm = () => {
+const ContactForm = (props) => {
     console.log(account);
-    const init = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        topic: '',
-        message: '',
-    };
+    const { fieldsList } = props;
+
+    const init = {};
+    fieldsList.forEach(({ name, defaultValue }) => {
+        init[name] = defaultValue;
+    });
 
     const reducer = (state, { name, value }) => {
         return { ...state, [name]: value };
     };
 
     const [state, dispatch] = useReducer(reducer, init);
-    const { firstName, lastName, email, phoneNumber, topic, message } = state;
+
+    const renderFieldList = () => {
+        return fieldsList.map(({ name, type, cols, rows, placeholder }) => {
+            if (type === 'textarea') {
+                return (
+                    <>
+                        <textarea
+                            key={name}
+                            name={name}
+                            value={state[name]}
+                            cols={cols}
+                            rows={rows}
+                            placeholder={placeholder}
+                            onChange={(e) => {
+                                return dispatch(e.target);
+                            }}
+                        />
+                        <br />
+                    </>
+                );
+            }
+            return (
+                <>
+                    <input
+                        key={name}
+                        value={state[name]}
+                        name={name}
+                        type={type}
+                        placeholder={placeholder}
+                        onChange={(e) => {
+                            return dispatch(e.target);
+                        }}
+                    />
+                    <br />
+                </>
+            );
+        });
+    };
+
     return (
-        <form>
-            <input
-                name="firstName"
-                value={firstName}
-                type="text"
-                placeholder="Podaj imię..."
-                onChange={(e) => {
-                    return dispatch(e.target);
-                }}
-            />
-            <br />
-            <input
-                name="lastName"
-                value={lastName}
-                type="text"
-                placeholder="Podaj nazwisko..."
-                onChange={(e) => {
-                    return dispatch(e.target);
-                }}
-            />
-            <br />
-            <input
-                name="email"
-                value={email}
-                type="email"
-                placeholder="Podaj adres e-mail..."
-                onChange={(e) => {
-                    return dispatch(e.target);
-                }}
-            />
-            <br />
-            <input
-                name="phoneNumber"
-                value={phoneNumber}
-                type="text"
-                placeholder="Podaj numer telefonu"
-                onChange={(e) => {
-                    return dispatch(e.target);
-                }}
-            />
-            <br />
-            <input
-                name="topic"
-                value={topic}
-                type="text"
-                placeholder="Podaj temat..."
-                onChange={(e) => {
-                    return dispatch(e.target);
-                }}
-            />
-            <br />
-            <textarea
-                name="message"
-                value={message}
-                cols="30"
-                rows="10"
-                onChange={(e) => {
-                    return dispatch(e.target);
-                }}
-            />
-        </form>
+        <div className="container">
+            <form>
+                {renderFieldList()}
+                <input type="submit" value="Wyślij" />
+            </form>
+        </div>
     );
+};
+
+ContactForm.propTypes = {
+    fieldsList: PropsTypes.arrayOf(
+        PropsTypes.shape({
+            name: PropsTypes.string.isRequired,
+            type: PropsTypes.string.isRequired,
+            defaultValue: PropsTypes.string.isRequired,
+            cols: PropsTypes.number,
+            rows: PropsTypes.number,
+            placeholder: PropsTypes.string.isRequired,
+        }),
+    ).isRequired,
 };
 
 export default ContactForm;
